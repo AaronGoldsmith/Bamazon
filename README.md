@@ -2,8 +2,11 @@
 A Amazon CLI application. Bamazon uses mysql calls to interact with the data stored locally on our DB.
 
 ### Requirements To Run
-- `mysql@5.7` must be running on your local computer
-- `Node.js` must be installed along with the following packages
+- `mysql` version 5.7 should be used when running the CLI app
+- `Node.js`  Along with the following packages
+  * mysql
+  * console.table
+  
    ```
    npm install mysql console.table
    ``` 
