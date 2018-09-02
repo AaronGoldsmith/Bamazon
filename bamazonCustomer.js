@@ -3,6 +3,9 @@ var mysql = require('mysql')
 var inquirer = require("inquirer");
 var loader; // for timeOut
 
+/* TODO: add functionality to "add to cart" */
+var cart = [];
+
 var connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
