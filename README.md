@@ -1,5 +1,5 @@
 # Bamazon
- The program runs in the terminal and takes in user input to query a local database. Users interact with the application through the Node.js package, `inquirer`. Inquirer provides a simple way to take in user input and use it to make _mysql_ calls to the database. Inquirer relies on the asynchronicity of _promises_ to construct the data objects before making the query. 
+ The program runs in the terminal and takes in user input to query a local database. Users interact with the application through the Node.js package, `inquirer`. Inquirer provides a simple way to take in user input and use it to make *_mysql_* calls to the database. Inquirer relies on the asynchronicity of *_promises_* to construct the data objects before making the query. 
 
 ## Configuration
 
