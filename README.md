@@ -28,6 +28,7 @@ More information about the required packages can be found below:
 ## 1. Bamazon Customer
 <img src="https://i.imgur.com/FgvNRin.gif" width="480px" style="display:block;margin: 0 auto">
 
+Keep track of the items you purchase as you shop through the _virtual Bamazon store_. 
 
 ## 2. Bamazon Manager
 

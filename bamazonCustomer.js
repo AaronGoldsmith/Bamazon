@@ -19,6 +19,20 @@ connection.connect(function(err) {
   viewItems();
 });
 
+function showCart(){
+  var sum = 0;
+  var products = [];
+  var str = ""
+  cart.forEach(item => {
+    products.push({'Item': item.Product,'Price': "$"+item.Price});
+    sum+=item.Price
+  })
+  // console.log items in cart
+  // console.log total spent
+  console.table("\n   CART:   ",products);
+  console.log("\t Total  = $"+sum+"\n\n");
+
+}
 // returns true iff v is a positive number
 // ID's will never be 0, quantity should never be 0
 function checkNum(v) {
@@ -59,15 +73,10 @@ function purchaseItem() {
           // conditionally change append an s if they are using the plural version
           var product = parseInt(answer.qty) > 1 ? ITEM + "s" : ITEM;
           console.log(
-            "\n You may buy " +
-              answer.qty +
-              " " +
-              product +
-              " for $" +
-              resp[0].price +
-              " each,\n There will be " +
-              postBuy +
-              " left in stock after your purchase\n"
+            "\n You may buy " + answer.qty + " " + 
+              product + " for $" +
+              resp[0].price + " each,\n There will be " +
+              postBuy + " left in stock after your purchase\n"
           );
           var total = parseInt(answer.qty) * resp[0].price;
           inquirer
@@ -78,6 +87,7 @@ function purchaseItem() {
             })
             .then(function(ans) {
               if (ans.confirm) {
+                cart.push({Product:ITEM,Price:total})
                 connection.query(
                   "UPDATE products SET ? WHERE ?",
                   [
@@ -92,6 +102,8 @@ function purchaseItem() {
                     if (err) throw err;
                     console.log("Thanks for your purchase!");
                     viewItems();
+                    showCart();
+
                   }
                 );
               } else {
@@ -105,9 +117,7 @@ function purchaseItem() {
 
 function viewItems() {
   clearInterval(loader);
-  console.log(
-    "\nType the ID and quantity of the item you would like to purchase\n"
-  );
+  console.log("\nType the ID and quantity of the item you would like to purchase\n");
 
   var query =
     "SELECT item_id,product_name, price, stock_quantity FROM products";
