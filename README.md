@@ -30,3 +30,5 @@ More information about the required packages can be found below:
 
 
 ## 2. Bamazon Manager
+
+**Bamazon Manager** implements many of the same features as Bamazon Customer, while providing additional administrative privilledges. Managers can add new items, restock on existing products, and view the low inventory items. 

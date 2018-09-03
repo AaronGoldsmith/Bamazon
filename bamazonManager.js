@@ -20,6 +20,7 @@ connection.connect(function(err) {
 });
 
 function menu_choices() {
+   // clear the console
   var options = [
     "  * View all items in stock",
     "  * View low-inventory items\n",
@@ -36,7 +37,11 @@ function menu_choices() {
       pageSize: 10
     })
     .then(function(answers) {
-      // selection contains the index of the
+      // clear console for reduced cognitive load
+      // comment this out if you are sending stdout to a log
+
+      console.log('\x1Bc');
+      // selection contains the index of the user's choice
       var selection = options.indexOf(answers.selection);
       switch (selection) {
         case 0:
@@ -58,49 +63,109 @@ function menu_choices() {
       }
     });
 }
+ // function returns an object
+function row_fromResp(response){
+  //acts as an assertion
+  if((!response.item_id)||(!response.product_name)||
+      (!response.price)||(!response.stock_quantity))
+      {return;}
+  return {
+    ID: response.item_id,
+    Product: response.product_name,
+    Price: response.price,
+    Qty: response.stock_quantity
+  }  
+}
 
+function timeoutDriver(){
+  loader = setTimeout(function() {
+    inquirer
+      .prompt({
+        message: " continue?",
+        type: "confirm",
+        name: "confirm"
+      })
+      .then(function(answers) {
+        console.log("\n")
+        if (answers.confirm) {
+          menu_choices();
+
+        } else {
+          connection.end();
+        }
+      });
+  }, 3000);
+}
 function viewProducts() {
   // connect to DB select all, print into table
-
   var query = "SELECT * FROM products WHERE stock_quantity > 0";
   connection.query(query, function(err, resp) {
     if (err) throw err;
     var rows = [];
     for (var i = 0; i < resp.length; i++) {
-      rows.push({
-        ID: resp[i].item_id,
-        Product: resp[i].product_name,
-        Price: resp[i].price,
-        Qty: resp[i].stock_quantity
-      });
+      rows.push(row_fromResp(resp[i]));
     }
-    console.table("\tPRODUCT VIEWER", rows);
+    console.table("\n\tPRODUCT VIEWER", rows);
     // timeout for 3sec before asking to continue?
-    loader = setTimeout(function() {
-      inquirer
-        .prompt({
-          message: " continue?",
-          type: "confirm",
-          name: "confirm"
-        })
-        .then(function(answers) {
-          if (answers.confirm) {
-            menu_choices();
-          } else {
-            connection.end();
-          }
-        });
-    }, 3000);
+    timeoutDriver()
   });
 }
 
+
+
 function lowInventory() {
-  // connect to DB select all where count(stock_quantity) < 5
+  // select all rows where count(stock_quantity) < 5
+  var query = "SELECT * FROM products WHERE stock_quantity<5 "
+  connection.query(query, function(err, resp) {
+    if (err) throw err;
+    var rows = [];
+    for (var i = 0; i < resp.length; i++) {
+      rows.push(row_fromResp(resp[i]));
+    }
+    console.table("   Inventory - Low Stock", rows);
+    timeoutDriver();
+  });
 }
 
 function refillItem() {
-  // inquire about which item should be refilled
-  // ask about the quantity
+  // custom vs default
+  // inquire about which items should be refilled or display all?
+  var query = "SELECT * FROM products ORDER BY stock_quantity"
+  connection.query(query, function(err, resp) {
+
+  inquirer.prompt(
+    [{
+      message: "Choose an item to restock",
+      type: "list",
+      name: "restock",
+      choices: function(){
+        var items = [];
+        for(var i = 0;i<resp.length;i++){
+          items.push(resp[i].product_name+" ("+resp[i].stock_quantity+" left)");
+        }
+        return items;
+      }
+    },{
+      message: "How many should get ordered?",
+      type: "input",
+      name: "quant",
+    }])
+  .then(function(answers) {
+    var name = answers.restock.split("]")[0]
+    var id = name.split("[")[1];
+    var query = "UPDATE products SET ? WHERE ?"
+    connection.query(query,[
+      {
+        stock_quantity:answers.quant
+      },{
+        item_id: id
+      }],function(err){
+        if(err) throw err;
+        menu_choices();
+      })
+  })
+})
+
 }
 
 function addNewItem() {
