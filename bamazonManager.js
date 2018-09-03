@@ -14,6 +14,7 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
   if (err) throw err;
   var rline = "_".repeat(33) + "\n";
+  console.log('\x1Bc');
   console.log(rline);
   console.log("• Connected to Manager's Portal •\n" + rline);
   menu_choices();
@@ -24,9 +25,9 @@ function menu_choices() {
   var options = [
     "  * View all items in stock",
     "  * View low-inventory items\n",
-    "  * Reorder items from distributors",
+    "  * Add to inventory",
     "  * Add a new product\n",
-    "QUIT    "
+    "  ·QUIT APPLICATION·  "
   ];
   inquirer
     .prompt({
@@ -89,13 +90,13 @@ function timeoutDriver(){
         console.log("\n")
         if (answers.confirm) {
           menu_choices();
-
         } else {
           connection.end();
         }
       });
   }, 3000);
 }
+
 function viewProducts() {
   // connect to DB select all, print into table
   var query = "SELECT * FROM products WHERE stock_quantity > 0";
@@ -106,12 +107,14 @@ function viewProducts() {
       rows.push(row_fromResp(resp[i]));
     }
     console.table("\n\tPRODUCT VIEWER", rows);
-    // timeout for 3sec before asking to continue?
+
+    // setTimeout for 3sec before asking to continue
     timeoutDriver()
   });
 }
-
-
+function checkNum(v) {
+  return !isNaN(v) && parseInt(v) > 0;
+}
 
 function lowInventory() {
   // select all rows where count(stock_quantity) < 5
@@ -127,48 +130,108 @@ function lowInventory() {
   });
 }
 
-function refillItem() {
-  // custom vs default
-  // inquire about which items should be refilled or display all?
-  var query = "SELECT * FROM products ORDER BY stock_quantity"
-  connection.query(query, function(err, resp) {
 
-  inquirer.prompt(
+
+function refillItem() {
+  var newTotal;  
+  var query = "SELECT * FROM products ORDER BY stock_quantity"
+  var items = [] // dictionary will hold name:quantity
+
+  connection.query(query, function(err, resp) {
+    if(err) throw err;
+    inquirer.prompt(
     [{
       message: "Choose an item to restock",
       type: "list",
       name: "restock",
       choices: function(){
-        var items = [];
+        var titles = [];
         for(var i = 0;i<resp.length;i++){
-          items.push(resp[i].product_name+" ("+resp[i].stock_quantity+" left)");
+           items[resp[i].product_name]=resp[i].stock_quantity
+           titles.push(resp[i].product_name)
         }
-        return items;
-      }
-    },{
+        return titles;
+      },
+      pageSize: 15
+    },
+      {
       message: "How many should get ordered?",
       type: "input",
       name: "quant",
+      validate: checkNum
     }])
   .then(function(answers) {
-    var name = answers.restock.split("]")[0]
-    var id = name.split("[")[1];
-    var query = "UPDATE products SET ? WHERE ?"
-    connection.query(query,[
+    // product to restock
+    var current = answers.restock;
+
+    // update our database with the sum of existing + number ordered
+    newTotal = parseInt(items[current]) + parseInt(answers.quant)
+    connection.query("UPDATE products SET ? WHERE ?",
+      [{
+        stock_quantity: newTotal
+      },
       {
-        stock_quantity:answers.quant
-      },{
-        item_id: id
-      }],function(err){
+        product_name: answers.restock
+      }
+    ],function(err){
         if(err) throw err;
         menu_choices();
       })
   })
-})
+});
 
 }
 
 function addNewItem() {
   // inquire about name, price, and quantity
   // make sure that item isn't already in our table
+  var depts = [];
+  connection.query("SELECT product_name,department_name FROM products",function(err,res){
+    if(err) throw err;
+    
+    // filters out repeats
+    res.forEach(response => {
+      if(depts.indexOf(response.department_name)==-1){depts.push(response.department_name)
+      }
+    })
+ 
+  inquirer.prompt([{
+    message: "What should the item be referred to as?",
+    type: "input",
+    name: "product"
+  },
+  {
+    message: "What is the price per item?",
+    type: "input",
+    name: "itemPrice",
+    validate: checkNum
+  },
+  {
+    message: "What department will it go in?",
+    type: "list",
+    name: "dept",
+    choices: depts
+  },
+{
+  message: "How many should there be in stock?",
+  type: "input",
+  name: "quant",
+  validate: checkNum
+}])
+  .then(function(answers) {
+    var query = "INSERT INTO products SET ?"
+    connection.query(query,
+    {
+      product_name:answers.product,
+      department_name:answers.dept,
+      price: parseFloat(answers.itemPrice),
+      stock_quantity: parseInt(answers.quant)
+    },function(error){
+      if(error) throw error
+      console.log('good')
+    })
+    menu_choices(); 
+
+  })
+})
 }

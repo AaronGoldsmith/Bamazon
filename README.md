@@ -28,7 +28,8 @@ More information about the required packages can be found below:
 ## 1. Bamazon Customer
 <img src="https://i.imgur.com/FgvNRin.gif" width="480px" style="display:block;margin: 0 auto">
 
+Keep track of the items you purchase as you shop through the _virtual Bamazon store_. 
 
 ## 2. Bamazon Manager
 
-**Bamazon Manager** implements many of the same features as Bamazon Customer, while providing additional administrative privilledges. Managers can add new items, restock on existing products, and view the low inventory items. 
+**Bamazon Manager** implements many of the same features as Bamazon Customer, while providing additional administrative privilledges. Managers can add new items, restock on existing products, and view the items that are almost out of stock. 
