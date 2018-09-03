@@ -24,9 +24,9 @@ function menu_choices() {
   var options = [
     "  * View all items in stock",
     "  * View low-inventory items\n",
-    "  * Reorder items from distributors",
+    "  * Retock an inventory item",
     "  * Add a new product\n",
-    "QUIT    "
+    "QUIT ╳    "
   ];
   inquirer
     .prompt({
@@ -96,6 +96,7 @@ function timeoutDriver(){
       });
   }, 3000);
 }
+
 function viewProducts() {
   // connect to DB select all, print into table
   var query = "SELECT * FROM products WHERE stock_quantity > 0";
@@ -110,8 +111,9 @@ function viewProducts() {
     timeoutDriver()
   });
 }
-
-
+function checkNum(v) {
+  return !isNaN(v) && parseInt(v) > 0;
+}
 
 function lowInventory() {
   // select all rows where count(stock_quantity) < 5
@@ -127,45 +129,57 @@ function lowInventory() {
   });
 }
 
-function refillItem() {
-  // custom vs default
-  // inquire about which items should be refilled or display all?
-  var query = "SELECT * FROM products ORDER BY stock_quantity"
-  connection.query(query, function(err, resp) {
 
-  inquirer.prompt(
+
+function refillItem() {
+  var newTotal;  
+  var query = "SELECT * FROM products ORDER BY stock_quantity"
+  var items = [] // dictionary will hold name:quantity
+
+  connection.query(query, function(err, resp) {
+    if(err) throw err;
+    inquirer.prompt(
     [{
       message: "Choose an item to restock",
       type: "list",
       name: "restock",
       choices: function(){
-        var items = [];
+        var titles = [];
         for(var i = 0;i<resp.length;i++){
-          items.push(resp[i].product_name+" ("+resp[i].stock_quantity+" left)");
+           items[resp[i].product_name]=resp[i].stock_quantity
+           titles.push(resp[i].product_name)
         }
-        return items;
-      }
-    },{
+        return titles;
+      },
+      pageSize: 15
+    },
+      {
       message: "How many should get ordered?",
       type: "input",
       name: "quant",
+      validate: checkNum
     }])
   .then(function(answers) {
-    var name = answers.restock.split("]")[0]
-    var id = name.split("[")[1];
-    var query = "UPDATE products SET ? WHERE ?"
-    connection.query(query,[
+    // product to restock
+    var current = answers.restock;
+
+    // update our database with the sum of existing + number ordered
+    newTotal = parseInt(items[current]) + parseInt(answers.quant)
+    connection.query("UPDATE products SET ? WHERE ?",
+      [{
+        stock_quantity: newTotal
+      },
       {
-        stock_quantity:answers.quant
-      },{
-        item_id: id
-      }],function(err){
+        product_name: answers.restock
+      }
+    ],function(err){
         if(err) throw err;
         menu_choices();
       })
   })
-})
+});
 
+// });
 }
 
 function addNewItem() {
