@@ -14,6 +14,7 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
   if (err) throw err;
   var rline = "_".repeat(33) + "\n";
+  console.log('\x1Bc');
   console.log(rline);
   console.log("• Connected to Manager's Portal •\n" + rline);
   menu_choices();
@@ -24,9 +25,9 @@ function menu_choices() {
   var options = [
     "  * View all items in stock",
     "  * View low-inventory items\n",
-    "  * Retock an inventory item",
+    "  * Add to inventory",
     "  * Add a new product\n",
-    "QUIT ╳    "
+    "  ·QUIT APPLICATION·  "
   ];
   inquirer
     .prompt({
@@ -179,7 +180,6 @@ function refillItem() {
   })
 });
 
-// });
 }
 
 function addNewItem() {
@@ -188,11 +188,12 @@ function addNewItem() {
   var depts = [];
   connection.query("SELECT product_name,department_name FROM products",function(err,res){
     if(err) throw err;
+    
+    // filters out repeats
     res.forEach(response => {
       if(depts.indexOf(response.department_name)==-1){depts.push(response.department_name)
       }
     })
-    // console.log(res.department_name)
  
   inquirer.prompt([{
     message: "What should the item be referred to as?",
