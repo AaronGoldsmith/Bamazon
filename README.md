@@ -35,4 +35,6 @@ Keep track of the items you purchase as you shop through the _virtual Bamazon st
 
 **Bamazon Manager** implements many of the same features as Bamazon Customer, while providing additional administrative privilledges. Managers can add new items, restock on existing products, and view the items that are almost out of stock. 
 
-![Bamazon items](assets/Bamazon-items.png)  ![Bamazon Manager](assets/Bamazon.png)   ![Bamazon add](assets/Bamazon-add.png) 
+![Bamazon items](assets/Bamazon-items.png) 
+
+ ![Bamazon Manager](assets/Bamazon.png)   ![Bamazon add](assets/Bamazon-add.png) 
