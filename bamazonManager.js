@@ -196,7 +196,7 @@ function addNewItem() {
     })
  
   inquirer.prompt([{
-    message: "What should the item be referred to as?",
+    message: "What's the product called?",
     type: "input",
     name: "product"
   },

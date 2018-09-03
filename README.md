@@ -3,7 +3,8 @@
 
 ## *Required* configuration 
  
- 
+  Install   [npm](https://docs.npmjs.com/misc/developers) - Node Package Manager
+
   ### `mysql`  -<small style="margin-left:10px"> written for **version 5.7**</small>
     
   ![connect to local server](assets/connecting.png)
@@ -33,3 +34,5 @@ Keep track of the items you purchase as you shop through the _virtual Bamazon st
 ## 2. Bamazon Manager
 
 **Bamazon Manager** implements many of the same features as Bamazon Customer, while providing additional administrative privilledges. Managers can add new items, restock on existing products, and view the items that are almost out of stock. 
+
+![Bamazon items](assets/Bamazon-items.png)  ![Bamazon Manager](assets/Bamazon.png)   ![Bamazon add](assets/Bamazon-add.png) 
