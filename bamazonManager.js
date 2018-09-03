@@ -89,7 +89,6 @@ function timeoutDriver(){
         console.log("\n")
         if (answers.confirm) {
           menu_choices();
-
         } else {
           connection.end();
         }
@@ -107,7 +106,8 @@ function viewProducts() {
       rows.push(row_fromResp(resp[i]));
     }
     console.table("\n\tPRODUCT VIEWER", rows);
-    // timeout for 3sec before asking to continue?
+
+    // setTimeout for 3sec before asking to continue
     timeoutDriver()
   });
 }
@@ -185,4 +185,52 @@ function refillItem() {
 function addNewItem() {
   // inquire about name, price, and quantity
   // make sure that item isn't already in our table
+  var depts = [];
+  connection.query("SELECT product_name,department_name FROM products",function(err,res){
+    if(err) throw err;
+    res.forEach(response => {
+      if(depts.indexOf(response.department_name)==-1){depts.push(response.department_name)
+      }
+    })
+    // console.log(res.department_name)
+ 
+  inquirer.prompt([{
+    message: "What should the item be referred to as?",
+    type: "input",
+    name: "product"
+  },
+  {
+    message: "What is the price per item?",
+    type: "input",
+    name: "itemPrice",
+    validate: checkNum
+  },
+  {
+    message: "What department will it go in?",
+    type: "list",
+    name: "dept",
+    choices: depts
+  },
+{
+  message: "How many should there be in stock?",
+  type: "input",
+  name: "quant",
+  validate: checkNum
+}])
+  .then(function(answers) {
+    var query = "INSERT INTO products SET ?"
+    connection.query(query,
+    {
+      product_name:answers.product,
+      department_name:answers.dept,
+      price: parseFloat(answers.itemPrice),
+      stock_quantity: parseInt(answers.quant)
+    },function(error){
+      if(error) throw error
+      console.log('good')
+    })
+    menu_choices(); 
+
+  })
+})
 }
