@@ -26,7 +26,14 @@ More information about the required packages can be found below:
 
 -----
 
-## 1. Bamazon Customer
+## Bamazon Customer
+### **`bamazonCustomer.js`** - Run the bamazon app as a customer 
+
+Start the program by running 
+>  `node bamazonCustomer.js`
+
+The program allows users to simulate a simple CLI to interact with their inventory. Users can walk through the steps of adding items to their cart and purchasing the items online. The database will 
+
 <img src="https://i.imgur.com/FgvNRin.gif" width="480px" style="display:block;margin: 0 auto">
 
 Keep track of the items you purchase as you shop through the _virtual Bamazon store_. 
